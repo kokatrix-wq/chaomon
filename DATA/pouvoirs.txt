@@ -1,0 +1,708 @@
+POUVOIRS DES CARTES
+===================
+
+Source : users.csv - 1074 cartes (716 communes · 162 rares · 137 épiques · 55 légendaires · 4 mythiques)
+Généré par gencara.py (graine 42) : 84 pouvoirs passifs distincts (attribués 1383 fois) et 141 pouvoirs actifs distincts (attribués 396 fois).
+
+Raretés : C commune · R rare · É épique · L légendaire · M mythique
+Palier : 1 simple · 2 courant · 3 avancé · 4 puissant · 5 ultime
+Valeur : coût du pouvoir en points de stats (1 point = 1 ATK ou 1 PV) ; plus elle est haute, plus le pouvoir est fort et plus il réduit les stats de la carte (une valeur négative est une contrainte : la carte gagne des stats).
+Entre parenthèses : nombre de cartes par rareté qui ont ce pouvoir.
+
+RÉSUMÉ PAR RARETÉ
+-----------------
+rareté       cartes    ATK     PV   total   coût  passifs  actifs  coût actifs  puissance  sans pouvoir
+commune         716   2,89   3,72    6,61   3,31     1,19    0,19         1,13       9,11         4,2 %
+rare            162   3,43   4,32    7,75   3,64     1,32    0,41         2,13      11,99         0,6 %
+épique          137   4,53   5,43    9,96   5,51     1,49    0,78         3,32      18,60         0,0 %
+légendaire       55   5,80   6,67   12,47   6,29     1,85    1,44         4,25      29,26         0,0 %
+mythique          4   7,75  11,50   19,25   7,75     2,00    2,00         6,50      50,79         0,0 %
+
+Courbe de coûts (nombre de cartes par coût d'invocation, en mana)
+coût            1     2     3     4     5     6     7     8     9    10
+commune        37   195   220   124    83    32    21     4     0     0
+rare            0    37    52    34    23     6     8     2     0     0
+épique          0     0    12    29    31    28    18    17     2     0
+légendaire      0     0     0     6     9    13    17    10     0     0
+mythique        0     0     0     0     0     0     1     3     0     0
+
+Corrélation de Pearson avec le rang de rareté : stats (ATK+PV) r = 0,41 ; nombre de pouvoirs r = 0,59 ; puissance totale r = 0,79 ; coût r = 0,53
+Coût et puissance : r = 0,88 sur l'ensemble ; à rareté égale : commune 0,98 · rare 0,98 · épique 0,98 · légendaire 0,96
+
+LEXIQUE
+-------
+  Mana : ressource unique du jeu : N points au tour N (1 au tour 1, 2 au tour 2, etc.). Elle paie le coût d'invocation des cartes et le coût des pouvoirs actifs ; une réduction de coût ne descend pas sous 0 mana.
+  Coût d'invocation : mana à payer pour jouer la carte (colonne Coût, de 1 à 10) : une carte de coût N se joue au plus tôt au tour N. Plus une carte est puissante (stats et pouvoirs), plus elle coûte ; à coût égal, une carte rare dispose de plus de puissance qu'une commune.
+  Engager : coût particulier : la carte s'épuise ; elle ne peut plus attaquer ni payer un autre coût « Engager » avant votre prochain tour (une utilisation par tour).
+  Sacrifier cette créature : coût particulier : la carte est détruite pour payer le coût.
+  Payer 2 PV : coût particulier : votre héros perd 2 PV.
+  Héros : le joueur lui-même ; ses PV sont ses points de vie.
+  Cible : une créature ou un héros, au choix du joueur, sauf précision.
+  Jeton n/n : créature supplémentaire de n ATK et n PV, sans capacité.
+  Durée : un bonus ou un effet sans durée précisée est permanent ; « jusqu'à la fin du tour » le rend temporaire.
+  Détruire : envoie la créature au cimetière, quels que soient ses PV (sans effet sur Indestructible et Immunité).
+  Geler : la cible ne peut pas attaquer à son prochain tour.
+  Réduire au silence : la créature perd toutes ses capacités.
+  Réanimer : remet en jeu une créature du cimetière avec ses stats d'origine.
+  Voler N PV : le héros adverse perd N PV et le vôtre en gagne N.
+  Dégâts de zone : infligés à chacune des créatures concernées.
+
+
+POUVOIRS PASSIFS (84)
+=====================
+
+--- Mots-clés (21) ---
+• Défenseur   [palier 1 · valeur -1,5 · 11 cartes (C9 R2)]
+    Effet : Ne peut pas attaquer (son ATK est toujours 0).
+• Piétinement   [palier 1 · valeur 1,0 · 30 cartes (C28 R2)]
+    Effet : Si ses dégâts dépassent les PV de la créature qui la bloque, l'excédent est infligé au héros adverse.
+• Portée   [palier 1 · valeur 1,0 · 21 cartes (C17 R4)]
+    Effet : Peut bloquer les créatures qui ont Vol.
+• Provocation   [palier 1 · valeur 1,0 · 59 cartes (C53 R6)]
+    Effet : Les créatures ennemies doivent attaquer cette carte avant toute autre cible.
+• Vigilance   [palier 1 · valeur 1,0 · 39 cartes (C34 R5)]
+    Effet : Attaquer ne l'engage pas : elle reste disponible pour bloquer et pour ses pouvoirs « Engager ».
+• Initiative   [palier 1 · valeur 1,5 · 23 cartes (C22 R1)]
+    Effet : Inflige ses dégâts de combat avant son adversaire : si elle le détruit, elle ne subit aucun dégât.
+• Menace   [palier 1 · valeur 1,5 · 32 cartes (C29 R3)]
+    Effet : Ne peut être bloquée que par deux créatures ou plus.
+• Bouclier divin   [palier 1 · valeur 2,0 · 48 cartes (C46 R2)]
+    Effet : Ignore la première source de dégâts qu'elle subit, puis perd le Bouclier.
+• Camouflage   [palier 1 · valeur 2,0 · 34 cartes (C28 R6)]
+    Effet : L'adversaire ne peut pas la cibler tant qu'elle n'a pas attaqué.
+• Célérité   [palier 1 · valeur 2,0 · 35 cartes (C33 R2)]
+    Effet : Peut attaquer dès le tour où elle est jouée.
+• Lien de vie   [palier 1 · valeur 2,0 · 36 cartes (C32 R4)]
+    Effet : Les dégâts qu'elle inflige soignent votre héros du même montant.
+• Vol   [palier 1 · valeur 2,0 · 66 cartes (C59 R7)]
+    Effet : Ne peut être bloquée que par une créature qui a Vol ou Portée.
+• Contact mortel   [palier 2 · valeur 2,5 · 23 cartes (C11 R6 É6)]
+    Effet : Toute créature blessée par elle est détruite.
+• Insaisissable   [palier 2 · valeur 2,5 · 14 cartes (C10 R2 É2)]
+    Effet : Ne peut pas être ciblée par les pouvoirs de l'adversaire.
+• Régénération   [palier 2 · valeur 2,5 · 28 cartes (C20 R6 É2)]
+    Effet : Récupère tous ses PV à la fin de chaque tour.
+• Furie des vents   [palier 2 · valeur 3,0 · 21 cartes (C12 R5 É4)]
+    Effet : Peut attaquer deux fois par tour.
+• Renaissance   [palier 2 · valeur 3,0 · 16 cartes (C7 R4 É5)]
+    Effet : La première fois qu'elle est détruite, elle revient en jeu avec 1 PV (et perd Renaissance).
+• Double initiative   [palier 3 · valeur 4,0 · 12 cartes (R3 É7 L2)]
+    Effet : Inflige ses dégâts de combat deux fois : d'abord avant son adversaire, puis en même temps que lui.
+• Indestructible   [palier 4 · valeur 5,0 · 11 cartes (É3 L8)]
+    Effet : Ne peut pas être détruite, ni par des dégâts, ni par un effet « Détruire ».
+• Méga-furie des vents   [palier 4 · valeur 6,0 · 7 cartes (É3 L4)]
+    Effet : Peut attaquer trois fois par tour.
+• Immunité   [palier 5 · valeur 8,0 · 3 cartes (L2 M1)]
+    Effet : Ne subit aucun dégât et ne peut pas être affectée négativement par les pouvoirs adverses.
+
+--- Cris de guerre (31) ---
+• Cri de guerre : Soigner 2 PV à une cible   [palier 1 · valeur 1,0 · 16 cartes (C15 R1)]
+    Effet : Quand la carte est jouée : soigner 2 PV à une cible.
+• Cri de guerre : Geler une créature ennemie   [palier 1 · valeur 1,5 · 13 cartes (C13)]
+    Effet : Quand la carte est jouée : geler une créature ennemie.
+• Cri de guerre : Infliger 1 dégât à une cible   [palier 1 · valeur 1,5 · 29 cartes (C24 R5)]
+    Effet : Quand la carte est jouée : infliger 1 dégât à une cible.
+• Cri de guerre : Soigner 3 PV à une cible   [palier 1 · valeur 1,5 · 24 cartes (C22 R2)]
+    Effet : Quand la carte est jouée : soigner 3 PV à une cible.
+• Cri de guerre : Invoquer un jeton 1/1   [palier 1 · valeur 1,6 · 17 cartes (C15 R2)]
+    Effet : Quand la carte est jouée : invoquer un jeton 1/1.
+• Cri de guerre : Donner +1/+1 à une créature alliée   [palier 1 · valeur 2,0 · 25 cartes (C24 R1)]
+    Effet : Quand la carte est jouée : donner +1/+1 à une créature alliée.
+• Cri de guerre : Piocher 1 carte   [palier 1 · valeur 2,0 · 25 cartes (C21 R4)]
+    Effet : Quand la carte est jouée : piocher 1 carte.
+• Cri de guerre : Réduire une créature au silence   [palier 1 · valeur 2,0 · 15 cartes (C15)]
+    Effet : Quand la carte est jouée : réduire une créature au silence.
+• Cri de guerre : Soigner 4 PV à une cible   [palier 1 · valeur 2,0 · 16 cartes (C15 R1)]
+    Effet : Quand la carte est jouée : soigner 4 PV à une cible.
+• Cri de guerre : Faire défausser 1 carte à l'adversaire   [palier 2 · valeur 2,5 · 12 cartes (C9 R3)]
+    Effet : Quand la carte est jouée : faire défausser 1 carte à l'adversaire.
+• Cri de guerre : Infliger 2 dégâts à une cible   [palier 2 · valeur 2,5 · 35 cartes (C17 R13 É5)]
+    Effet : Quand la carte est jouée : infliger 2 dégâts à une cible.
+• Cri de guerre : Renvoyer une créature ennemie dans sa main   [palier 2 · valeur 3,0 · 10 cartes (C5 R3 É2)]
+    Effet : Quand la carte est jouée : renvoyer une créature ennemie dans sa main.
+• Cri de guerre : Soigner 6 PV à une cible   [palier 2 · valeur 3,0 · 24 cartes (C8 R11 É5)]
+    Effet : Quand la carte est jouée : soigner 6 PV à une cible.
+• Cri de guerre : Invoquer un jeton 2/2   [palier 3 · valeur 3,2 · 5 cartes (R2 É3)]
+    Effet : Quand la carte est jouée : invoquer un jeton 2/2.
+• Cri de guerre : Infliger 1 dégât à toutes les créatures ennemies   [palier 3 · valeur 3,5 · 7 cartes (R1 É4 L2)]
+    Effet : Quand la carte est jouée : infliger 1 dégât à toutes les créatures ennemies.
+• Cri de guerre : Infliger 3 dégâts à une cible   [palier 3 · valeur 3,5 · 9 cartes (R1 É5 L3)]
+    Effet : Quand la carte est jouée : infliger 3 dégâts à une cible.
+• Cri de guerre : Donner +2/+2 à une créature alliée   [palier 3 · valeur 4,0 · 12 cartes (R3 É7 L2)]
+    Effet : Quand la carte est jouée : donner +2/+2 à une créature alliée.
+• Cri de guerre : Infliger 4 dégâts à une cible   [palier 3 · valeur 4,5 · 8 cartes (R3 É3 L2)]
+    Effet : Quand la carte est jouée : infliger 4 dégâts à une cible.
+• Cri de guerre : Piocher 2 cartes   [palier 3 · valeur 4,5 · 10 cartes (É9 L1)]
+    Effet : Quand la carte est jouée : piocher 2 cartes.
+• Cri de guerre : Invoquer un jeton 3/3   [palier 4 · valeur 4,8 · 8 cartes (É5 L3)]
+    Effet : Quand la carte est jouée : invoquer un jeton 3/3.
+• Cri de guerre : Infliger 5 dégâts à une cible   [palier 4 · valeur 5,5 · 6 cartes (É1 L5)]
+    Effet : Quand la carte est jouée : infliger 5 dégâts à une cible.
+• Cri de guerre : Donner +3/+3 à une créature alliée   [palier 4 · valeur 6,0 · 10 cartes (É7 L2 M1)]
+    Effet : Quand la carte est jouée : donner +3/+3 à une créature alliée.
+• Cri de guerre : Invoquer un jeton 4/4   [palier 4 · valeur 6,4 · 8 cartes (É4 L4)]
+    Effet : Quand la carte est jouée : invoquer un jeton 4/4.
+• Cri de guerre : Infliger 2 dégâts à toutes les créatures ennemies   [palier 4 · valeur 6,5 · 4 cartes (É1 L3)]
+    Effet : Quand la carte est jouée : infliger 2 dégâts à toutes les créatures ennemies.
+• Cri de guerre : Détruire une créature ennemie   [palier 4 · valeur 7,0 · 4 cartes (É1 L2 M1)]
+    Effet : Quand la carte est jouée : détruire une créature ennemie.
+• Cri de guerre : Piocher 3 cartes   [palier 4 · valeur 7,0 · 7 cartes (É2 L5)]
+    Effet : Quand la carte est jouée : piocher 3 cartes.
+• Cri de guerre : Invoquer un jeton 5/5   [palier 5 · valeur 8,0 · 2 cartes (L2)]
+    Effet : Quand la carte est jouée : invoquer un jeton 5/5.
+• Cri de guerre : Prendre définitivement le contrôle d'une créature ennemie   [palier 5 · valeur 9,0 · 2 cartes (L2)]
+    Effet : Quand la carte est jouée : prendre définitivement le contrôle d'une créature ennemie.
+• Cri de guerre : Infliger 3 dégâts à toutes les créatures ennemies   [palier 5 · valeur 9,5 · 2 cartes (L2)]
+    Effet : Quand la carte est jouée : infliger 3 dégâts à toutes les créatures ennemies.
+• Cri de guerre : Invoquer un jeton 6/6   [palier 5 · valeur 9,6 · 3 cartes (L3)]
+    Effet : Quand la carte est jouée : invoquer un jeton 6/6.
+• Cri de guerre : Détruire toutes les autres créatures   [palier 5 · valeur 10,0 · 1 carte (M1)]
+    Effet : Quand la carte est jouée : détruire toutes les autres créatures.
+
+--- Râles d'agonie (14) ---
+• Râle d'agonie : Infliger 1 dégât à une créature ennemie aléatoire   [palier 1 · valeur 1,2 · 17 cartes (C15 R2)]
+    Effet : Quand la carte est détruite : infliger 1 dégât à une créature ennemie aléatoire.
+• Râle d'agonie : Invoquer un jeton 1/1   [palier 1 · valeur 1,3 · 18 cartes (C17 R1)]
+    Effet : Quand la carte est détruite : invoquer un jeton 1/1.
+• Râle d'agonie : Piocher 1 carte   [palier 1 · valeur 1,6 · 30 cartes (C24 R6)]
+    Effet : Quand la carte est détruite : piocher 1 carte.
+• Râle d'agonie : Infliger 2 dégâts à une créature ennemie aléatoire   [palier 1 · valeur 2,0 · 15 cartes (C13 R2)]
+    Effet : Quand la carte est détruite : infliger 2 dégâts à une créature ennemie aléatoire.
+• Râle d'agonie : Invoquer un jeton 2/2   [palier 2 · valeur 2,6 · 18 cartes (C12 R4 É2)]
+    Effet : Quand la carte est détruite : invoquer un jeton 2/2.
+• Râle d'agonie : Infliger 3 dégâts à une créature ennemie aléatoire   [palier 2 · valeur 2,8 · 25 cartes (C11 R8 É6)]
+    Effet : Quand la carte est détruite : infliger 3 dégâts à une créature ennemie aléatoire.
+• Râle d'agonie : Infliger 2 dégâts à toutes les créatures   [palier 2 · valeur 3,0 · 14 cartes (C9 R3 É2)]
+    Effet : Quand la carte est détruite : infliger 2 dégâts à toutes les créatures.
+• Râle d'agonie : Infliger 4 dégâts à une créature ennemie aléatoire   [palier 3 · valeur 3,6 · 11 cartes (R3 É5 L3)]
+    Effet : Quand la carte est détruite : infliger 4 dégâts à une créature ennemie aléatoire.
+• Râle d'agonie : Piocher 2 cartes   [palier 3 · valeur 3,6 · 14 cartes (R3 É10 L1)]
+    Effet : Quand la carte est détruite : piocher 2 cartes.
+• Râle d'agonie : Invoquer un jeton 3/3   [palier 3 · valeur 3,9 · 11 cartes (R2 É8 L1)]
+    Effet : Quand la carte est détruite : invoquer un jeton 3/3.
+• Râle d'agonie : Infliger 5 dégâts à une créature ennemie aléatoire   [palier 3 · valeur 4,4 · 12 cartes (R2 É9 L1)]
+    Effet : Quand la carte est détruite : infliger 5 dégâts à une créature ennemie aléatoire.
+• Râle d'agonie : Détruire une créature ennemie aléatoire   [palier 4 · valeur 5,0 · 3 cartes (É1 L2)]
+    Effet : Quand la carte est détruite : détruire une créature ennemie aléatoire.
+• Râle d'agonie : Invoquer un jeton 4/4   [palier 4 · valeur 5,2 · 5 cartes (É3 L2)]
+    Effet : Quand la carte est détruite : invoquer un jeton 4/4.
+• Râle d'agonie : Invoquer un jeton 5/5   [palier 4 · valeur 6,5 · 6 cartes (É3 L2 M1)]
+    Effet : Quand la carte est détruite : invoquer un jeton 5/5.
+
+--- Auras (9) ---
+• Aura : Vos autres créatures gagnent +0/+1   [palier 1 · valeur 2,0 · 17 cartes (C16 R1)]
+    Effet : Tant que la carte est en jeu : vos autres créatures gagnent +0/+1.
+• Aura : Vos autres créatures gagnent +1/+0   [palier 2 · valeur 3,0 · 29 cartes (C15 R9 É5)]
+    Effet : Tant que la carte est en jeu : vos autres créatures gagnent +1/+0.
+• Aura : Vos capacités actives coûtent 1 mana de moins   [palier 3 · valeur 3,5 · 8 cartes (R2 É4 L2)]
+    Effet : Tant que la carte est en jeu : vos capacités actives coûtent 1 mana de moins.
+• Aura : Les créatures ennemies perdent 1 ATK   [palier 3 · valeur 4,0 · 7 cartes (R1 É3 L3)]
+    Effet : Tant que la carte est en jeu : les créatures ennemies perdent 1 ATK.
+• Aura : Vos autres créatures gagnent +1/+1   [palier 4 · valeur 5,0 · 11 cartes (É6 L5)]
+    Effet : Tant que la carte est en jeu : vos autres créatures gagnent +1/+1.
+• Aura : Vos capacités actives coûtent 2 mana de moins   [palier 4 · valeur 6,5 · 5 cartes (É2 L3)]
+    Effet : Tant que la carte est en jeu : vos capacités actives coûtent 2 mana de moins.
+• Aura : Les créatures ennemies perdent 2 ATK   [palier 4 · valeur 7,0 · 2 cartes (É1 L1)]
+    Effet : Tant que la carte est en jeu : les créatures ennemies perdent 2 ATK.
+• Aura : Vos autres créatures gagnent Vol   [palier 5 · valeur 7,5 · 4 cartes (L4)]
+    Effet : Tant que la carte est en jeu : vos autres créatures gagnent Vol.
+• Aura : Vos autres créatures gagnent +2/+2   [palier 5 · valeur 9,0 · 3 cartes (M3)]
+    Effet : Tant que la carte est en jeu : vos autres créatures gagnent +2/+2.
+
+--- Autres déclencheurs (9) ---
+• Enragé : +2 ATK tant que cette créature est blessée   [palier 1 · valeur 1,5 · 18 cartes (C17 R1)]
+    Effet : Tant qu'il lui manque des PV, elle gagne +2 ATK.
+• Fin de votre tour : Soigner 2 PV à une créature alliée   [palier 1 · valeur 1,5 · 19 cartes (C16 R3)]
+    Effet : À la fin de chacun de vos tours : soigner 2 PV à une créature alliée.
+• Quand elle attaque : Geler la cible   [palier 1 · valeur 2,0 · 13 cartes (C10 R3)]
+    Effet : Chaque fois que la carte attaque : geler la cible.
+• Quand elle détruit une créature : Se soigner entièrement   [palier 2 · valeur 2,5 · 21 cartes (C10 R6 É5)]
+    Effet : Chaque fois que la carte détruit une créature : se soigner entièrement.
+• Fin de votre tour : Invoquer un jeton 1/1   [palier 2 · valeur 3,0 · 12 cartes (C5 R3 É4)]
+    Effet : À la fin de chacun de vos tours : invoquer un jeton 1/1.
+• Quand elle attaque : Piocher 1 carte   [palier 2 · valeur 3,0 · 23 cartes (C9 R9 É5)]
+    Effet : Chaque fois que la carte attaque : piocher 1 carte.
+• Quand une autre créature alliée est détruite : Gagner +1/+1 définitivement   [palier 2 · valeur 3,0 · 11 cartes (C3 R7 É1)]
+    Effet : Chaque fois qu'une autre de vos créatures est détruite : gagner +1/+1 définitivement.
+• Début de votre tour : Infliger 1 dégât à une créature ennemie aléatoire   [palier 3 · valeur 3,5 · 13 cartes (R3 É7 L3)]
+    Effet : Au début de chacun de vos tours : infliger 1 dégât à une créature ennemie aléatoire.
+• Fin de votre tour : Gagner +1/+1 définitivement   [palier 3 · valeur 3,5 · 30 cartes (R4 É16 L10)]
+    Effet : À la fin de chacun de vos tours : gagner +1/+1 définitivement.
+
+
+POUVOIRS ACTIFS (141)
+=====================
+Un pouvoir actif s'écrit « coût : fonction » ; le joueur le déclenche en payant son coût.
+
+--- Dégâts à une cible (15) ---
+• Engager : Infliger 1 dégât à une cible   [palier 1 · valeur 1,1 · 4 cartes (C4)]
+    Coût : Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Infliger 1 dégât à une cible.
+• 1 mana : Infliger 1 dégât à une cible   [palier 1 · valeur 1,6 · 4 cartes (C3 R1)]
+    Coût : 1 mana
+    Effet : Infliger 1 dégât à une cible.
+• 1 mana + Engager : Infliger 2 dégâts à une cible   [palier 1 · valeur 1,7 · 5 cartes (C4 R1)]
+    Coût : 1 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Infliger 2 dégâts à une cible.
+• 2 mana : Infliger 2 dégâts à une cible   [palier 2 · valeur 2,2 · 1 carte (É1)]
+    Coût : 2 mana
+    Effet : Infliger 2 dégâts à une cible.
+• 2 mana + Engager : Infliger 3 dégâts à une cible   [palier 2 · valeur 2,3 · 5 cartes (C2 R1 É2)]
+    Coût : 2 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Infliger 3 dégâts à une cible.
+• 3 mana : Infliger 3 dégâts à une cible   [palier 2 · valeur 2,8 · 1 carte (R1)]
+    Coût : 3 mana
+    Effet : Infliger 3 dégâts à une cible.
+• 1 mana : Infliger 2 dégâts à une cible   [palier 3 · valeur 3,2 · 1 carte (L1)]
+    Coût : 1 mana
+    Effet : Infliger 2 dégâts à une cible.
+• 4 mana : Infliger 4 dégâts à une cible   [palier 3 · valeur 3,4 · 1 carte (L1)]
+    Coût : 4 mana
+    Effet : Infliger 4 dégâts à une cible.
+• 4 mana + Engager : Infliger 5 dégâts à une cible   [palier 3 · valeur 3,5 · 2 cartes (R1 É1)]
+    Coût : 4 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Infliger 5 dégâts à une cible.
+• 2 mana : Infliger 3 dégâts à une cible   [palier 3 · valeur 3,8 · 2 cartes (É1 L1)]
+    Coût : 2 mana
+    Effet : Infliger 3 dégâts à une cible.
+• 5 mana : Infliger 5 dégâts à une cible   [palier 3 · valeur 4,0 · 3 cartes (É2 L1)]
+    Coût : 5 mana
+    Effet : Infliger 5 dégâts à une cible.
+• 5 mana + Engager : Infliger 6 dégâts à une cible   [palier 3 · valeur 4,1 · 1 carte (L1)]
+    Coût : 5 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Infliger 6 dégâts à une cible.
+• 3 mana : Infliger 4 dégâts à une cible   [palier 3 · valeur 4,4 · 1 carte (É1)]
+    Coût : 3 mana
+    Effet : Infliger 4 dégâts à une cible.
+• 6 mana : Infliger 6 dégâts à une cible   [palier 4 · valeur 4,6 · 2 cartes (L2)]
+    Coût : 6 mana
+    Effet : Infliger 6 dégâts à une cible.
+• 3 mana : Infliger 5 dégâts à une cible   [palier 4 · valeur 5,0 · 1 carte (L1)]
+    Coût : 3 mana
+    Effet : Infliger 5 dégâts à une cible.
+
+--- Dégâts de zone (toutes les créatures ennemies) (11) ---
+• 1 mana + Sacrifier cette créature : Infliger 1 dégât à toutes les créatures ennemies   [palier 1 · valeur 1,4 · 1 carte (C1)]
+    Coût : 1 mana + Sacrifier cette créature (la carte est détruite)
+    Effet : Infliger 1 dégât à toutes les créatures ennemies.
+• 2 mana + Sacrifier cette créature : Infliger 2 dégâts à toutes les créatures ennemies   [palier 2 · valeur 2,2 · 3 cartes (C1 R1 É1)]
+    Coût : 2 mana + Sacrifier cette créature (la carte est détruite)
+    Effet : Infliger 2 dégâts à toutes les créatures ennemies.
+• 3 mana : Infliger 1 dégât à toutes les créatures ennemies   [palier 2 · valeur 2,5 · 5 cartes (C2 R2 É1)]
+    Coût : 3 mana
+    Effet : Infliger 1 dégât à toutes les créatures ennemies.
+• 3 mana + Sacrifier cette créature : Infliger 3 dégâts à toutes les créatures ennemies   [palier 3 · valeur 3,1 · 1 carte (L1)]
+    Coût : 3 mana + Sacrifier cette créature (la carte est détruite)
+    Effet : Infliger 3 dégâts à toutes les créatures ennemies.
+• 2 mana : Infliger 1 dégât à toutes les créatures ennemies   [palier 3 · valeur 3,5 · 1 carte (L1)]
+    Coût : 2 mana
+    Effet : Infliger 1 dégât à toutes les créatures ennemies.
+• 4 mana + Sacrifier cette créature : Infliger 4 dégâts à toutes les créatures ennemies   [palier 3 · valeur 4,0 · 2 cartes (É2)]
+    Coût : 4 mana + Sacrifier cette créature (la carte est détruite)
+    Effet : Infliger 4 dégâts à toutes les créatures ennemies.
+• 5 mana : Infliger 2 dégâts à toutes les créatures ennemies   [palier 3 · valeur 4,0 · 1 carte (É1)]
+    Coût : 5 mana
+    Effet : Infliger 2 dégâts à toutes les créatures ennemies.
+• 3 mana : Infliger 2 dégâts à toutes les créatures ennemies   [palier 4 · valeur 5,0 · 2 cartes (É1 L1)]
+    Coût : 3 mana
+    Effet : Infliger 2 dégâts à toutes les créatures ennemies.
+• 8 mana : Infliger 3 dégâts à toutes les créatures ennemies   [palier 4 · valeur 5,5 · 2 cartes (É1 L1)]
+    Coût : 8 mana
+    Effet : Infliger 3 dégâts à toutes les créatures ennemies.
+• 5 mana : Infliger 3 dégâts à toutes les créatures ennemies   [palier 4 · valeur 6,5 · 1 carte (L1)]
+    Coût : 5 mana
+    Effet : Infliger 3 dégâts à toutes les créatures ennemies.
+• 7 mana : Infliger 4 dégâts à toutes les créatures ennemies   [palier 5 · valeur 8,0 · 3 cartes (L2 M1)]
+    Coût : 7 mana
+    Effet : Infliger 4 dégâts à toutes les créatures ennemies.
+
+--- Dégâts au héros adverse (13) ---
+• Payer 2 PV : Infliger 2 dégâts au héros adverse   [palier 1 · valeur 1,7 · 5 cartes (C5)]
+    Coût : Payer 2 PV (votre héros perd 2 PV)
+    Effet : Infliger 2 dégâts au héros adverse.
+• 2 mana : Infliger 2 dégâts au héros adverse   [palier 1 · valeur 2,0 · 1 carte (C1)]
+    Coût : 2 mana
+    Effet : Infliger 2 dégâts au héros adverse.
+• 1 mana + Payer 2 PV : Infliger 4 dégâts au héros adverse   [palier 2 · valeur 2,6 · 1 carte (C1)]
+    Coût : 1 mana + Payer 2 PV (votre héros perd 2 PV)
+    Effet : Infliger 4 dégâts au héros adverse.
+• 3 mana : Infliger 4 dégâts au héros adverse   [palier 2 · valeur 2,9 · 1 carte (C1)]
+    Coût : 3 mana
+    Effet : Infliger 4 dégâts au héros adverse.
+• 1 mana : Infliger 2 dégâts au héros adverse   [palier 2 · valeur 3,0 · 3 cartes (É3)]
+    Coût : 1 mana
+    Effet : Infliger 2 dégâts au héros adverse.
+• 3 mana + Payer 2 PV : Infliger 6 dégâts au héros adverse   [palier 3 · valeur 3,6 · 2 cartes (É1 L1)]
+    Coût : 3 mana + Payer 2 PV (votre héros perd 2 PV)
+    Effet : Infliger 6 dégâts au héros adverse.
+• 2 mana : Infliger 4 dégâts au héros adverse   [palier 3 · valeur 3,9 · 2 cartes (É1 L1)]
+    Coût : 2 mana
+    Effet : Infliger 4 dégâts au héros adverse.
+• 4 mana + Payer 2 PV : Infliger 8 dégâts au héros adverse   [palier 4 · valeur 4,5 · 3 cartes (É1 L2)]
+    Coût : 4 mana + Payer 2 PV (votre héros perd 2 PV)
+    Effet : Infliger 8 dégâts au héros adverse.
+• 6 mana : Infliger 8 dégâts au héros adverse   [palier 4 · valeur 4,8 · 1 carte (É1)]
+    Coût : 6 mana
+    Effet : Infliger 8 dégâts au héros adverse.
+• 3 mana : Infliger 6 dégâts au héros adverse   [palier 4 · valeur 4,9 · 1 carte (L1)]
+    Coût : 3 mana
+    Effet : Infliger 6 dégâts au héros adverse.
+• 6 mana + Payer 2 PV : Infliger 10 dégâts au héros adverse   [palier 4 · valeur 5,5 · 3 cartes (É1 L2)]
+    Coût : 6 mana + Payer 2 PV (votre héros perd 2 PV)
+    Effet : Infliger 10 dégâts au héros adverse.
+• 8 mana : Infliger 10 dégâts au héros adverse   [palier 4 · valeur 5,8 · 1 carte (É1)]
+    Coût : 8 mana
+    Effet : Infliger 10 dégâts au héros adverse.
+• 4 mana : Infliger 8 dégâts au héros adverse   [palier 4 · valeur 5,8 · 3 cartes (É2 L1)]
+    Coût : 4 mana
+    Effet : Infliger 8 dégâts au héros adverse.
+
+--- Soin d'une créature alliée (10) ---
+• Engager : Soigner 2 PV à une créature alliée   [palier 1 · valeur 1,1 · 5 cartes (C3 R2)]
+    Coût : Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Soigner 2 PV à une créature alliée.
+• 1 mana + Engager : Soigner 3 PV à une créature alliée   [palier 1 · valeur 1,4 · 7 cartes (C7)]
+    Coût : 1 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Soigner 3 PV à une créature alliée.
+• 1 mana : Soigner 2 PV à une créature alliée   [palier 1 · valeur 1,6 · 2 cartes (C2)]
+    Coût : 1 mana
+    Effet : Soigner 2 PV à une créature alliée.
+• 1 mana + Engager : Soigner 4 PV à une créature alliée   [palier 1 · valeur 1,7 · 4 cartes (C4)]
+    Coût : 1 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Soigner 4 PV à une créature alliée.
+• 2 mana : Soigner 3 PV à une créature alliée   [palier 1 · valeur 1,9 · 4 cartes (C4)]
+    Coût : 2 mana
+    Effet : Soigner 3 PV à une créature alliée.
+• 2 mana : Soigner 4 PV à une créature alliée   [palier 2 · valeur 2,2 · 3 cartes (C1 R1 É1)]
+    Coût : 2 mana
+    Effet : Soigner 4 PV à une créature alliée.
+• 2 mana + Engager : Soigner 6 PV à une créature alliée   [palier 2 · valeur 2,3 · 6 cartes (C1 R2 É3)]
+    Coût : 2 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Soigner 6 PV à une créature alliée.
+• 3 mana : Soigner 6 PV à une créature alliée   [palier 2 · valeur 2,8 · 4 cartes (C1 R2 É1)]
+    Coût : 3 mana
+    Effet : Soigner 6 PV à une créature alliée.
+• 3 mana + Engager : Soigner 8 PV à une créature alliée   [palier 2 · valeur 2,9 · 4 cartes (C1 R2 É1)]
+    Coût : 3 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Soigner 8 PV à une créature alliée.
+• 4 mana : Soigner 8 PV à une créature alliée   [palier 3 · valeur 3,4 · 7 cartes (É3 L4)]
+    Coût : 4 mana
+    Effet : Soigner 8 PV à une créature alliée.
+
+--- Soin de toutes vos créatures (4) ---
+• 2 mana + Engager : Soigner 2 PV à toutes vos créatures   [palier 1 · valeur 2,0 · 3 cartes (C3)]
+    Coût : 2 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Soigner 2 PV à toutes vos créatures.
+• 3 mana : Soigner 2 PV à toutes vos créatures   [palier 2 · valeur 2,5 · 2 cartes (R2)]
+    Coût : 3 mana
+    Effet : Soigner 2 PV à toutes vos créatures.
+• 4 mana + Engager : Soigner 4 PV à toutes vos créatures   [palier 3 · valeur 3,5 · 3 cartes (É1 L2)]
+    Coût : 4 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Soigner 4 PV à toutes vos créatures.
+• 5 mana : Soigner 4 PV à toutes vos créatures   [palier 3 · valeur 4,0 · 2 cartes (É2)]
+    Coût : 5 mana
+    Effet : Soigner 4 PV à toutes vos créatures.
+
+--- Drain de PV du héros adverse (8) ---
+• Engager : Voler 1 PV au héros adverse   [palier 1 · valeur 1,2 · 13 cartes (C11 R2)]
+    Coût : Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Voler 1 PV au héros adverse.
+• 1 mana : Voler 1 PV au héros adverse   [palier 1 · valeur 1,7 · 3 cartes (C3)]
+    Coût : 1 mana
+    Effet : Voler 1 PV au héros adverse.
+• 1 mana + Engager : Voler 2 PV au héros adverse   [palier 1 · valeur 1,9 · 9 cartes (C8 R1)]
+    Coût : 1 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Voler 2 PV au héros adverse.
+• 2 mana : Voler 2 PV au héros adverse   [palier 2 · valeur 2,4 · 4 cartes (C1 R2 É1)]
+    Coût : 2 mana
+    Effet : Voler 2 PV au héros adverse.
+• 3 mana + Engager : Voler 3 PV au héros adverse   [palier 2 · valeur 2,7 · 4 cartes (C2 R1 É1)]
+    Coût : 3 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Voler 3 PV au héros adverse.
+• 4 mana : Voler 3 PV au héros adverse   [palier 3 · valeur 3,2 · 7 cartes (R1 É4 L2)]
+    Coût : 4 mana
+    Effet : Voler 3 PV au héros adverse.
+• 5 mana + Engager : Voler 5 PV au héros adverse   [palier 3 · valeur 4,1 · 3 cartes (R1 É1 L1)]
+    Coût : 5 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Voler 5 PV au héros adverse.
+• 6 mana : Voler 5 PV au héros adverse   [palier 4 · valeur 4,6 · 1 carte (É1)]
+    Coût : 6 mana
+    Effet : Voler 5 PV au héros adverse.
+
+--- Pioche (10) ---
+• 1 mana + Engager : Piocher 1 carte   [palier 1 · valeur 1,7 · 4 cartes (C3 R1)]
+    Coût : 1 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Piocher 1 carte.
+• Payer 2 PV : Piocher 1 carte   [palier 1 · valeur 1,9 · 3 cartes (C1 R2)]
+    Coût : Payer 2 PV (votre héros perd 2 PV)
+    Effet : Piocher 1 carte.
+• 2 mana : Piocher 1 carte   [palier 2 · valeur 2,2 · 4 cartes (C1 R1 É2)]
+    Coût : 2 mana
+    Effet : Piocher 1 carte.
+• 4 mana + Engager : Piocher 2 cartes   [palier 3 · valeur 3,2 · 4 cartes (R1 É1 L2)]
+    Coût : 4 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Piocher 2 cartes.
+• 1 mana : Piocher 1 carte   [palier 3 · valeur 3,2 · 1 carte (L1)]
+    Coût : 1 mana
+    Effet : Piocher 1 carte.
+• 3 mana + Payer 2 PV : Piocher 2 cartes   [palier 3 · valeur 3,4 · 3 cartes (É3)]
+    Coût : 3 mana + Payer 2 PV (votre héros perd 2 PV)
+    Effet : Piocher 2 cartes.
+• 6 mana + Engager : Piocher 3 cartes   [palier 4 · valeur 4,7 · 4 cartes (É1 L3)]
+    Coût : 6 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Piocher 3 cartes.
+• 5 mana + Payer 2 PV : Piocher 3 cartes   [palier 4 · valeur 4,9 · 2 cartes (É1 L1)]
+    Coût : 5 mana + Payer 2 PV (votre héros perd 2 PV)
+    Effet : Piocher 3 cartes.
+• 7 mana : Piocher 3 cartes   [palier 4 · valeur 5,2 · 1 carte (É1)]
+    Coût : 7 mana
+    Effet : Piocher 3 cartes.
+• 5 mana : Piocher 3 cartes   [palier 4 · valeur 6,2 · 2 cartes (L2)]
+    Coût : 5 mana
+    Effet : Piocher 3 cartes.
+
+--- Renfort temporaire d'une créature (8) ---
+• Engager : Donner +1/+1 à une créature alliée jusqu'à la fin du tour   [palier 1 · valeur 1,1 · 5 cartes (C2 R3)]
+    Coût : Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Donner +1/+1 à une créature alliée jusqu'à la fin du tour.
+• 1 mana : Donner +1/+1 à une créature alliée jusqu'à la fin du tour   [palier 1 · valeur 1,6 · 2 cartes (C1 R1)]
+    Coût : 1 mana
+    Effet : Donner +1/+1 à une créature alliée jusqu'à la fin du tour.
+• 1 mana + Engager : Donner +2/+2 à une créature alliée jusqu'à la fin du tour   [palier 1 · valeur 1,7 · 4 cartes (C3 R1)]
+    Coût : 1 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Donner +2/+2 à une créature alliée jusqu'à la fin du tour.
+• 2 mana : Donner +2/+2 à une créature alliée jusqu'à la fin du tour   [palier 2 · valeur 2,2 · 5 cartes (C2 R1 É2)]
+    Coût : 2 mana
+    Effet : Donner +2/+2 à une créature alliée jusqu'à la fin du tour.
+• 2 mana + Engager : Donner +3/+3 à une créature alliée jusqu'à la fin du tour   [palier 2 · valeur 2,3 · 4 cartes (C1 R2 É1)]
+    Coût : 2 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Donner +3/+3 à une créature alliée jusqu'à la fin du tour.
+• 3 mana : Donner +3/+3 à une créature alliée jusqu'à la fin du tour   [palier 2 · valeur 2,8 · 5 cartes (C1 R2 É2)]
+    Coût : 3 mana
+    Effet : Donner +3/+3 à une créature alliée jusqu'à la fin du tour.
+• 3 mana + Engager : Donner +4/+4 à une créature alliée jusqu'à la fin du tour   [palier 2 · valeur 2,9 · 1 carte (R1)]
+    Coût : 3 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Donner +4/+4 à une créature alliée jusqu'à la fin du tour.
+• 4 mana : Donner +4/+4 à une créature alliée jusqu'à la fin du tour   [palier 3 · valeur 3,4 · 2 cartes (L2)]
+    Coût : 4 mana
+    Effet : Donner +4/+4 à une créature alliée jusqu'à la fin du tour.
+
+--- Renfort temporaire de toutes vos créatures (4) ---
+• 3 mana : Donner +1/+1 à toutes vos créatures jusqu'à la fin du tour   [palier 2 · valeur 2,8 · 2 cartes (R1 É1)]
+    Coût : 3 mana
+    Effet : Donner +1/+1 à toutes vos créatures jusqu'à la fin du tour.
+• 2 mana : Donner +1/+1 à toutes vos créatures jusqu'à la fin du tour   [palier 3 · valeur 3,8 · 5 cartes (É2 L3)]
+    Coût : 2 mana
+    Effet : Donner +1/+1 à toutes vos créatures jusqu'à la fin du tour.
+• 4 mana : Donner +2/+2 à toutes vos créatures jusqu'à la fin du tour   [palier 4 · valeur 5,6 · 3 cartes (L3)]
+    Coût : 4 mana
+    Effet : Donner +2/+2 à toutes vos créatures jusqu'à la fin du tour.
+• 6 mana : Donner +3/+3 à toutes vos créatures jusqu'à la fin du tour   [palier 5 · valeur 7,4 · 1 carte (L1)]
+    Coût : 6 mana
+    Effet : Donner +3/+3 à toutes vos créatures jusqu'à la fin du tour.
+
+--- Croissance permanente (11) ---
+• 1 mana + Engager : Gagner +1/+1 définitivement   [palier 1 · valeur 1,7 · 7 cartes (C4 R3)]
+    Coût : 1 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Gagner +1/+1 définitivement.
+• Payer 2 PV : Gagner +1/+1 définitivement   [palier 1 · valeur 1,9 · 3 cartes (C3)]
+    Coût : Payer 2 PV (votre héros perd 2 PV)
+    Effet : Gagner +1/+1 définitivement.
+• 2 mana : Gagner +1/+1 définitivement   [palier 2 · valeur 2,2 · 4 cartes (C2 É2)]
+    Coût : 2 mana
+    Effet : Gagner +1/+1 définitivement.
+• 3 mana + Engager : Gagner +2/+2 définitivement   [palier 2 · valeur 2,9 · 4 cartes (C1 R1 É2)]
+    Coût : 3 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Gagner +2/+2 définitivement.
+• 2 mana + Payer 2 PV : Gagner +2/+2 définitivement   [palier 3 · valeur 3,1 · 5 cartes (É1 L4)]
+    Coût : 2 mana + Payer 2 PV (votre héros perd 2 PV)
+    Effet : Gagner +2/+2 définitivement.
+• 1 mana : Gagner +1/+1 définitivement   [palier 3 · valeur 3,2 · 1 carte (É1)]
+    Coût : 1 mana
+    Effet : Gagner +1/+1 définitivement.
+• 4 mana : Gagner +2/+2 définitivement   [palier 3 · valeur 3,4 · 2 cartes (R1 É1)]
+    Coût : 4 mana
+    Effet : Gagner +2/+2 définitivement.
+• 4 mana + Payer 2 PV : Gagner +3/+3 définitivement   [palier 3 · valeur 4,3 · 3 cartes (É3)]
+    Coût : 4 mana + Payer 2 PV (votre héros perd 2 PV)
+    Effet : Gagner +3/+3 définitivement.
+• 3 mana : Gagner +2/+2 définitivement   [palier 3 · valeur 4,4 · 1 carte (L1)]
+    Coût : 3 mana
+    Effet : Gagner +2/+2 définitivement.
+• 6 mana : Gagner +3/+3 définitivement   [palier 4 · valeur 4,6 · 1 carte (L1)]
+    Coût : 6 mana
+    Effet : Gagner +3/+3 définitivement.
+• 4 mana : Gagner +3/+3 définitivement   [palier 4 · valeur 5,6 · 3 cartes (É2 L1)]
+    Coût : 4 mana
+    Effet : Gagner +3/+3 définitivement.
+
+--- Invocation de jetons (12) ---
+• Engager : Invoquer un jeton 1/1   [palier 1 · valeur 1,2 · 4 cartes (C4)]
+    Coût : Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Invoquer un jeton 1/1.
+• Payer 2 PV : Invoquer un jeton 1/1   [palier 1 · valeur 1,4 · 5 cartes (C5)]
+    Coût : Payer 2 PV (votre héros perd 2 PV)
+    Effet : Invoquer un jeton 1/1.
+• 1 mana : Invoquer un jeton 1/1   [palier 1 · valeur 1,7 · 2 cartes (C2)]
+    Coût : 1 mana
+    Effet : Invoquer un jeton 1/1.
+• Payer 2 PV : Invoquer un jeton 2/2   [palier 2 · valeur 2,1 · 3 cartes (R1 É2)]
+    Coût : Payer 2 PV (votre héros perd 2 PV)
+    Effet : Invoquer un jeton 2/2.
+• 2 mana : Invoquer un jeton 2/2   [palier 2 · valeur 2,4 · 3 cartes (R3)]
+    Coût : 2 mana
+    Effet : Invoquer un jeton 2/2.
+• 3 mana + Engager : Invoquer un jeton 3/3   [palier 2 · valeur 2,7 · 2 cartes (C1 É1)]
+    Coût : 3 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Invoquer un jeton 3/3.
+• 2 mana + Payer 2 PV : Invoquer un jeton 3/3   [palier 2 · valeur 2,9 · 2 cartes (É2)]
+    Coût : 2 mana + Payer 2 PV (votre héros perd 2 PV)
+    Effet : Invoquer un jeton 3/3.
+• 4 mana : Invoquer un jeton 3/3   [palier 3 · valeur 3,2 · 2 cartes (É1 L1)]
+    Coût : 4 mana
+    Effet : Invoquer un jeton 3/3.
+• 5 mana : Invoquer un jeton 4/4   [palier 3 · valeur 3,9 · 3 cartes (É2 L1)]
+    Coût : 5 mana
+    Effet : Invoquer un jeton 4/4.
+• 5 mana + Engager : Invoquer un jeton 5/5   [palier 3 · valeur 4,1 · 1 carte (É1)]
+    Coût : 5 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Invoquer un jeton 5/5.
+• 6 mana : Invoquer un jeton 5/5   [palier 4 · valeur 4,6 · 1 carte (L1)]
+    Coût : 6 mana
+    Effet : Invoquer un jeton 5/5.
+• 4 mana : Invoquer un jeton 5/5   [palier 4 · valeur 5,6 · 1 carte (L1)]
+    Coût : 4 mana
+    Effet : Invoquer un jeton 5/5.
+
+--- Gel (3) ---
+• 1 mana + Engager : Geler une créature ennemie (elle ne peut pas attaquer au prochain tour)   [palier 1 · valeur 1,4 · 2 cartes (C2)]
+    Coût : 1 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Geler une créature ennemie (elle ne peut pas attaquer au prochain tour).
+• 2 mana : Geler une créature ennemie (elle ne peut pas attaquer au prochain tour)   [palier 1 · valeur 1,9 · 3 cartes (C1 R2)]
+    Coût : 2 mana
+    Effet : Geler une créature ennemie (elle ne peut pas attaquer au prochain tour).
+• 1 mana : Geler une créature ennemie (elle ne peut pas attaquer au prochain tour)   [palier 2 · valeur 2,9 · 2 cartes (C1 É1)]
+    Coût : 1 mana
+    Effet : Geler une créature ennemie (elle ne peut pas attaquer au prochain tour).
+
+--- Silence (retrait des capacités) (2) ---
+• 1 mana + Engager : Réduire une créature au silence (elle perd ses capacités)   [palier 1 · valeur 1,7 · 3 cartes (C2 R1)]
+    Coût : 1 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Réduire une créature au silence (elle perd ses capacités).
+• 2 mana : Réduire une créature au silence (elle perd ses capacités)   [palier 2 · valeur 2,2 · 4 cartes (C1 R1 É2)]
+    Coût : 2 mana
+    Effet : Réduire une créature au silence (elle perd ses capacités).
+
+--- Bouclier divin accordé (3) ---
+• 2 mana + Engager : Donner Bouclier divin à une créature alliée   [palier 1 · valeur 2,0 · 3 cartes (C3)]
+    Coût : 2 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Donner Bouclier divin à une créature alliée.
+• 3 mana : Donner Bouclier divin à une créature alliée   [palier 2 · valeur 2,5 · 3 cartes (C2 R1)]
+    Coût : 3 mana
+    Effet : Donner Bouclier divin à une créature alliée.
+• 2 mana : Donner Bouclier divin à une créature alliée   [palier 3 · valeur 3,5 · 3 cartes (É1 L2)]
+    Coût : 2 mana
+    Effet : Donner Bouclier divin à une créature alliée.
+
+--- Indestructibilité temporaire (3) ---
+• 2 mana + Engager : Devenir indestructible jusqu'à la fin du tour   [palier 1 · valeur 2,0 · 2 cartes (C2)]
+    Coût : 2 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Devenir indestructible jusqu'à la fin du tour.
+• 3 mana : Devenir indestructible jusqu'à la fin du tour   [palier 2 · valeur 2,5 · 3 cartes (C1 R2)]
+    Coût : 3 mana
+    Effet : Devenir indestructible jusqu'à la fin du tour.
+• 2 mana : Devenir indestructible jusqu'à la fin du tour   [palier 3 · valeur 3,5 · 5 cartes (R1 É3 L1)]
+    Coût : 2 mana
+    Effet : Devenir indestructible jusqu'à la fin du tour.
+
+--- Renvoi en main (3) ---
+• 2 mana + Engager : Renvoyer une créature ennemie dans sa main   [palier 1 · valeur 2,0 · 1 carte (C1)]
+    Coût : 2 mana + Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Renvoyer une créature ennemie dans sa main.
+• 3 mana : Renvoyer une créature ennemie dans sa main   [palier 2 · valeur 2,5 · 2 cartes (R2)]
+    Coût : 3 mana
+    Effet : Renvoyer une créature ennemie dans sa main.
+• 2 mana : Renvoyer une créature ennemie dans sa main   [palier 3 · valeur 3,5 · 2 cartes (É2)]
+    Coût : 2 mana
+    Effet : Renvoyer une créature ennemie dans sa main.
+
+--- Défausse de l'adversaire (3) ---
+• 3 mana : Faire défausser 1 carte à l'adversaire   [palier 2 · valeur 2,5 · 3 cartes (C2 R1)]
+    Coût : 3 mana
+    Effet : Faire défausser 1 carte à l'adversaire.
+• 2 mana : Faire défausser 1 carte à l'adversaire   [palier 3 · valeur 3,5 · 2 cartes (L2)]
+    Coût : 2 mana
+    Effet : Faire défausser 1 carte à l'adversaire.
+• 5 mana : Faire défausser 2 cartes à l'adversaire   [palier 3 · valeur 4,0 · 2 cartes (R1 É1)]
+    Coût : 5 mana
+    Effet : Faire défausser 2 cartes à l'adversaire.
+
+--- Destruction conditionnelle (6) ---
+• 3 mana : Détruire une créature ennemie dont l'ATK est de 2 ou moins   [palier 2 · valeur 2,8 · 2 cartes (R1 É1)]
+    Coût : 3 mana
+    Effet : Détruire une créature ennemie dont l'ATK est de 2 ou moins.
+• 5 mana : Détruire une créature ennemie dont l'ATK est de 4 ou moins   [palier 3 · valeur 3,7 · 1 carte (R1)]
+    Coût : 5 mana
+    Effet : Détruire une créature ennemie dont l'ATK est de 4 ou moins.
+• 2 mana : Détruire une créature ennemie dont l'ATK est de 2 ou moins   [palier 3 · valeur 3,8 · 1 carte (É1)]
+    Coût : 2 mana
+    Effet : Détruire une créature ennemie dont l'ATK est de 2 ou moins.
+• 6 mana : Détruire une créature ennemie dont l'ATK est de 6 ou moins   [palier 4 · valeur 4,6 · 1 carte (L1)]
+    Coût : 6 mana
+    Effet : Détruire une créature ennemie dont l'ATK est de 6 ou moins.
+• 3 mana : Détruire une créature ennemie dont l'ATK est de 4 ou moins   [palier 4 · valeur 4,7 · 3 cartes (É1 L2)]
+    Coût : 3 mana
+    Effet : Détruire une créature ennemie dont l'ATK est de 4 ou moins.
+• 4 mana : Détruire une créature ennemie dont l'ATK est de 6 ou moins   [palier 4 · valeur 5,6 · 3 cartes (É2 M1)]
+    Coût : 4 mana
+    Effet : Détruire une créature ennemie dont l'ATK est de 6 ou moins.
+
+--- Destruction (3) ---
+• 5 mana + Payer 2 PV : Détruire une créature ennemie   [palier 4 · valeur 4,9 · 3 cartes (É1 L2)]
+    Coût : 5 mana + Payer 2 PV (votre héros perd 2 PV)
+    Effet : Détruire une créature ennemie.
+• 7 mana : Détruire une créature ennemie   [palier 4 · valeur 5,2 · 1 carte (L1)]
+    Coût : 7 mana
+    Effet : Détruire une créature ennemie.
+• 5 mana : Détruire une créature ennemie   [palier 4 · valeur 6,2 · 1 carte (M1)]
+    Coût : 5 mana
+    Effet : Détruire une créature ennemie.
+
+--- Contrôle temporaire (1) ---
+• 5 mana : Prendre le contrôle d'une créature ennemie jusqu'à la fin du tour   [palier 3 · valeur 4,0 · 6 cartes (É5 L1)]
+    Coût : 5 mana
+    Effet : Prendre le contrôle d'une créature ennemie jusqu'à la fin du tour.
+
+--- Contrôle permanent (2) ---
+• 10 mana : Prendre définitivement le contrôle d'une créature ennemie   [palier 5 · valeur 8,2 · 3 cartes (L2 M1)]
+    Coût : 10 mana
+    Effet : Prendre définitivement le contrôle d'une créature ennemie.
+• 7 mana : Prendre définitivement le contrôle d'une créature ennemie   [palier 5 · valeur 9,2 · 2 cartes (M2)]
+    Coût : 7 mana
+    Effet : Prendre définitivement le contrôle d'une créature ennemie.
+
+--- Réanimation (1) ---
+• 4 mana : Réanimer la dernière créature alliée détruite   [palier 4 · valeur 5,6 · 3 cartes (É1 L1 M1)]
+    Coût : 4 mana
+    Effet : Réanimer la dernière créature alliée détruite.
+
+--- Réanimation de masse (2) ---
+• 10 mana : Réanimer toutes vos créatures détruites   [palier 5 · valeur 8,8 · 1 carte (L1)]
+    Coût : 10 mana
+    Effet : Réanimer toutes vos créatures détruites.
+• 8 mana : Réanimer toutes vos créatures détruites   [palier 5 · valeur 9,8 · 1 carte (L1)]
+    Coût : 8 mana
+    Effet : Réanimer toutes vos créatures détruites.
+
+--- Balayage (détruit toutes les autres créatures) (1) ---
+• 8 mana : Détruire toutes les autres créatures   [palier 5 · valeur 9,8 · 1 carte (M1)]
+    Coût : 8 mana
+    Effet : Détruire toutes les autres créatures.
+
+--- Production de mana (2) ---
+• Engager : Produire 1 mana   [palier 1 · valeur 2,0 · 3 cartes (C3)]
+    Coût : Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Produire 1 mana.
+• Engager : Produire 2 mana   [palier 3 · valeur 4,0 · 2 cartes (É1 L1)]
+    Coût : Engager (la carte s'épuise : une seule utilisation par tour)
+    Effet : Produire 2 mana.
