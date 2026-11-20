@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Chaomon TCG — Collection, Decks & Duels</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <!-- Grand halo d'ambiance émeraude en haut + halos latéraux gauche et droite (style baLance) -->
+  <div class="ambient-halo" aria-hidden="true"></div>
+  <div class="ambient-halo-left" aria-hidden="true"></div>
+  <div class="ambient-halo-right" aria-hidden="true"></div>
+
+  <!-- BARRE DE NAVIGATION SUPÉRIEURE -->
+  <header class="topbar">
+    <div class="brand">
+      <img class="brand-logo-img" src="/assets/chao.jpg" alt="Logo Serveur" />
+      <div>
+        <h1>CHAOMON <span class="emerald-gradient-text">TCG</span></h1>
+        <span class="subtitle">Interface de gestion & Arène Web</span>
+      </div>
+    </div>
+
+    <nav class="nav-tabs" id="navTabs">
+      <button class="nav-btn active" data-tab="collection">
+        <span class="nav-icon">📚</span>
+        <span class="nav-label">Collection</span>
+      </button>
+      <button class="nav-btn" data-tab="decks">
+        <span class="nav-icon">🃏</span>
+        <span class="nav-label">Mes Decks (3)</span>
+      </button>
+      <button class="nav-btn" data-tab="duel" id="duelNavBtn">
+        <span class="nav-icon">⚔️</span>
+        <span class="nav-label">Arène de Duel</span>
+      </button>
+      <button class="nav-btn" data-tab="leaderboard">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-label">Classement</span>
+      </button>
+    </nav>
+
+    <div class="topbar-right">
+      <button type="button" id="toggleDeviceModeBtn" class="device-mode-btn" title="Basculer entre l'affichage PC et l'affichage Smartphone">
+        📱 Vue Mobile
+      </button>
+      <div class="player-pill" id="playerPill">
+        <img id="playerAvatar" src="/assets/avatars/dnn.png" alt="Avatar" />
+        <div class="player-meta">
+          <strong id="playerName">Non connecté</strong>
+          <span id="playerStats">Tape /deck sur Discord</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- BANNIÈRE SI NON AUTHENTIFIÉ -->
+  <section id="authWarning" class="auth-warning hidden">
+    <div class="auth-card">
+      <h2>🔒 Accès par Lien Magique requis</h2>
+      <p>Pour accéder à ta collection et gérer tes decks, tape la commande <code>/commencer</code> (nouveau joueur) ou <code>/deck</code> sur le serveur Discord.</p>
+      <p>Le bot t'enverra un bouton privé contenant ta clé de connexion automatique.</p>
+    </div>
+  </section>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main id="mainApp" class="main-container hidden">
+
+    <!-- BARRE ÉCONOMIE : CHAOR, PACKS, RECYCLAGE DES DOUBLONS & ACHAT DE PACK -->
+    <section class="economy-bar" id="economyBar">
+      <div class="economy-wallets">
+        <div class="wallet-pill chaor-pill" title="Monnaie obtenue en recyclant tes cartes en double (10 ChaOr / doublon)">
+          <span class="wallet-icon">🪙</span>
+          <div>
+            <strong id="chaorBalanceText">0 ChaOr</strong>
+            <small>Monnaie d'échange</small>
+          </div>
+        </div>
+
+        <div class="wallet-pill packs-pill" title="Tape /ouvrir sur Discord pour ouvrir tes packs un par un !">
+          <span class="wallet-icon">📦</span>
+          <div>
+            <strong id="packsBalanceText">0 Pack</strong>
+            <small>Ouvrir via <code>/ouvrir</code> sur Discord</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="economy-actions">
+        <button type="button" id="recycleDuplicatesBtn" class="btn-economy recycle-btn" disabled>
+          ♻️ Recycler mes doublons (0)
+        </button>
+        <button type="button" id="buyPackBtn" class="btn-economy buy-pack-btn" disabled>
+          🛒 Acheter 1 Pack (100 ChaOr)
+        </button>
+      </div>
+
+      <div id="economyFeedbackMsg" class="economy-feedback hidden"></div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- ONGLET 1 : COLLECTION                                              -->
+    <!-- ================================================================== -->
+    <section id="tab-collection" class="tab-panel active">
+      <!-- Barre d'action mobile pour ouvrir/fermer les filtres -->
+      <div class="mobile-filter-header">
+        <input type="search" id="mobileSearchMirror" placeholder="🔍 Rechercher une carte, un pouvoir..." />
+        <button type="button" id="toggleCollectionFiltersBtn" class="mobile-filter-toggle-btn">
+          ⚙️ Filtres
+        </button>
+      </div>
+
+      <div class="filters-bar" id="collectionFiltersBar">
+        <input type="search" id="searchInput" placeholder="🔍 Rechercher un membre, une créature, un pouvoir..." />
+
+        <select id="rarityFilter">
+          <option value="ALL">Toutes les raretés</option>
+          <option value="Mythique">🌟 Mythique</option>
+          <option value="Légendaire">🟠 Légendaire</option>
+          <option value="Épique">🟣 Épique</option>
+          <option value="Rare">🔵 Rare</option>
+          <option value="Commune">⚪ Commune</option>
+        </select>
+
+        <select id="alignmentFilter">
+          <option value="ALL">Tous les alignements</option>
+          <option value="Loyal Bon">Loyal Bon</option>
+          <option value="Neutre Bon">Neutre Bon</option>
+          <option value="Chaotique Bon">Chaotique Bon</option>
+          <option value="Loyal Neutre">Loyal Neutre</option>
+          <option value="Neutre Strict">Neutre Strict / Neutre</option>
+          <option value="Chaotique Neutre">Chaotique Neutre</option>
+          <option value="Loyal Mauvais">Loyal Mauvais</option>
+          <option value="Neutre Mauvais">Neutre Mauvais</option>
+          <option value="Chaotique Mauvais">Chaotique Mauvais</option>
+        </select>
+
+        <select id="ownershipFilter">
+          <option value="ALL">Catalogue complet</option>
+          <option value="OWNED">Possédées uniquement</option>
+          <option value="DUPLICATES">Doublons uniquement (x2+)</option>
+          <option value="MISSING">Manquantes uniquement</option>
+        </select>
+
+        <select id="sortFilter">
+          <option value="RARITY">Trier : Rareté</option>
+          <option value="COST_ASC">Trier : Coût (croissant)</option>
+          <option value="COST_DESC">Trier : Coût (décroissant)</option>
+          <option value="ATK_DESC">Trier : Attaque</option>
+          <option value="HP_DESC">Trier : Vie</option>
+          <option value="NAME_ASC">Trier : Nom (A → Z)</option>
+        </select>
+
+        <div class="collection-counter" id="collectionSummaryBadge">0 / 0 cartes</div>
+      </div>
+
+      <div id="collectionGrid" class="cards-grid"></div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- ONGLET 2 : DECKBUILDER (3 EMPLACEMENTS DE DECKS)                   -->
+    <!-- ================================================================== -->
+    <section id="tab-decks" class="tab-panel">
+      <div class="mobile-deck-top-slots">
+        <button class="slot-btn active" data-slot="1">Deck #1</button>
+        <button class="slot-btn" data-slot="2">Deck #2</button>
+        <button class="slot-btn" data-slot="3">Deck #3</button>
+      </div>
+
+      <div class="mobile-filter-header">
+        <input type="search" id="mobileDeckSearchMirror" placeholder="🔍 Filtrer mes cartes..." />
+        <button type="button" id="toggleDeckFiltersBtn" class="mobile-filter-toggle-btn">⚙️ Filtres</button>
+      </div>
+
+      <!-- Sous-cadre mobile (Disponibles / Sélectionnées / Toutes) -->
+      <div class="deck-view-subframe mobile-only-subframe" role="group" aria-label="Filtre d'affichage du deck">
+        <button type="button" class="deck-view-opt" data-deck-view="AVAILABLE">Disponibles</button>
+        <button type="button" class="deck-view-opt" data-deck-view="SELECTED">Sélectionnées</button>
+        <button type="button" class="deck-view-opt active" data-deck-view="ALL">Toutes</button>
+      </div>
+
+      <div class="deckbuilder-layout">
+        <div class="deck-pool-column">
+          <div class="filters-bar compact" id="deckFiltersBar">
+            <input type="search" id="deckSearchInput" placeholder="🔍 Filtrer mes cartes possédées..." />
+
+            <!-- Sous-cadre à 3 options mutuellement exclusives -->
+            <div class="deck-view-subframe" id="deckViewSubframe" role="group" aria-label="Filtre d'affichage du deck">
+              <button type="button" class="deck-view-opt" data-deck-view="AVAILABLE">Disponibles</button>
+              <button type="button" class="deck-view-opt" data-deck-view="SELECTED">Sélectionnées</button>
+              <button type="button" class="deck-view-opt active" data-deck-view="ALL">Toutes</button>
+            </div>
+
+            <select id="deckRarityFilter">
+              <option value="ALL">Toutes raretés</option>
+              <option value="Mythique">Mythique</option>
+              <option value="Légendaire">Légendaire</option>
+              <option value="Épique">Épique</option>
+              <option value="Rare">Rare</option>
+              <option value="Commune">Commune</option>
+            </select>
+
+            <select id="deckCostFilter">
+              <option value="ALL">Tous coûts</option>
+              <option value="1">1 Mana</option>
+              <option value="2">2 Mana</option>
+              <option value="3">3 Mana</option>
+              <option value="4">4 Mana</option>
+              <option value="5">5 Mana</option>
+              <option value="6">6 Mana</option>
+              <option value="7+">7+ Mana</option>
+            </select>
+          </div>
+          <p class="hint-bar">💡 Clique/touche une carte pour l’ajouter ou la retirer du deck actif (20 à 30 cartes uniques). Sur mobile, touche 🔍 en haut à gauche d'une carte pour la lire en grand.</p>
+          <div id="deckPoolGrid" class="cards-grid compact-grid"></div>
+        </div>
+
+        <div id="mobileDeckBackdrop" class="mobile-deck-backdrop hidden"></div>
+        <aside class="deck-sidebar" id="deckSidebarDrawer">
+          <div class="mobile-drawer-header">
+            <strong>📋 Gestion du Deck actif</strong>
+            <button type="button" id="closeMobileDeckDrawerBtn" class="modal-close" style="position:static;width:30px;height:30px;">✕</button>
+          </div>
+
+          <div class="deck-slots-tabs">
+            <button class="slot-btn active" data-slot="1">Deck #1</button>
+            <button class="slot-btn" data-slot="2">Deck #2</button>
+            <button class="slot-btn" data-slot="3">Deck #3</button>
+          </div>
+
+          <div class="deck-header-controls">
+            <input type="text" id="deckNameInput" maxlength="50" placeholder="Nom du deck..." />
+            <div class="deck-count-row">
+              <span id="deckCountBadge" class="deck-count-badge">0 / 30 uniques (min 20)</span>
+              <span id="deckAvgCost" class="deck-avg-cost">Coût moyen : 0.0</span>
+            </div>
+          </div>
+
+          <div class="mana-curve" id="manaCurve"></div>
+          <div class="deck-card-list" id="deckCardList"></div>
+
+          <div class="deck-actions">
+            <button id="clearDeckBtn" class="btn-secondary">🗑️ Vider</button>
+            <button id="saveDeckBtn" class="btn-primary">💾 Sauvegarder le Deck</button>
+          </div>
+          <div id="deckStatusMsg" class="deck-status-msg"></div>
+        </aside>
+      </div>
+
+      <div class="mobile-deck-bottom-bar" id="mobileDeckBottomBar">
+        <div class="mobile-deck-bar-info" id="openMobileDeckDrawerBtn">
+          <strong id="mobileDeckBarTitle">Deck #1</strong>
+          <span id="mobileDeckBarCount" class="deck-count-badge">0 / 30 cartes</span>
+        </div>
+        <div class="mobile-deck-bar-actions">
+          <button type="button" id="mobileOpenListBtn" class="btn-secondary">📋 Liste</button>
+          <button type="button" id="mobileQuickSaveDeckBtn" class="btn-primary">💾 Sauver</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- ONGLET 3 : ARÈNE DE DUEL TOUR PAR TOUR                             -->
+    <!-- ================================================================== -->
+    <section id="tab-duel" class="tab-panel">
+      <div id="duelContainer" class="duel-wrapper"></div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- ONGLET 4 : CLASSEMENT                                              -->
+    <!-- ================================================================== -->
+    <section id="tab-leaderboard" class="tab-panel">
+      <div class="leaderboard-box">
+        <h2>🏆 Classement du Serveur <span class="emerald-gradient-text">Chaomon</span></h2>
+        <div class="leaderboard-table-scroll">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Joueur</th>
+                <th>Elo</th>
+                <th>Victoires / Défaites</th>
+                <th>Collection unique</th>
+                <th>Total cartes</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODALE D'INSPECTION / ZOOM D'UNE CARTE -->
+  <div id="cardModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <button class="modal-close" id="closeModalBtn">✕</button>
+      <div class="modal-body">
+        <div id="modalCardContainer" class="modal-card-preview"></div>
+        <div class="modal-card-details" id="modalCardDetails"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
